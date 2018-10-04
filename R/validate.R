@@ -1,52 +1,100 @@
 #' @export
-validate <- function(manifestsView, parentId) {
-  synapser::synLogin()
+validate <- function(manifestsviewid, parentid) {
+  query <- glue::glue("select * from {manifestsviewid} where parentId=\'{parentid}\'")
+  dres <- synapser::synTableQuery(query)
+  submissiondata <- dres$asDataFrame() %>%
+    validate_manifests_submission() %>%
+    dplyr::arrange(nda_short_name)
 
-  # manifestsView <- 'syn12031228'
-  # parentId <- 'syn12138863' # Weinberger
-  # parentId <- 'syn12182254' # McConnell
+  subjectdatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "genomics_subject02")
+  sampledatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "genomics_sample03")
+  nichddatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "nichd_btb02")
 
-  d <- synapser::synTableQuery(glue::glue('select * from {manifestsView} where parentId=\'{parentId}\''))$asDataFrame()
+  subjectdataobj <- synapser::synGet(subjectdatarow$id,
+                                     version = subjectdatarow$currentVersion)
+  subjectdata <- readr::read_csv(subjectdataobj$path,
+                                 skip = 1) %>%
+    validate_subject_data(.)
 
-  d <- d %>%
-    assertr::verify(nrow(d) == 3) %>%
+  nichddataobj <- synapser::synGet(nichddatarow$id,
+                                   version = nichddatarow$currentVersion)
+  nichddata <- readr::read_csv(nichddataobj$path,
+                               skip = 1) %>%
+    validate_nichd_data(., subjectdata = subjectdata)
+
+  sampledataobj <- synapser::synGet(sampledatarow$id,
+                                    version = sampledatarow$currentVersion)
+  sampledata <- readr::read_csv(sampledataobj$path,
+                                skip = 1) %>%
+    validate_sample_data(.,
+                         submissiondata = submissiondata,
+                         subjectdata = subjectdata,
+                         nichddata = nichddata)
+
+  # submissiondata <- submissiondata %>% tibble::as_tibble()
+  # submissiondata$data <- list(sampledata, subjectdata, nichddata)
+  # return(submissiondata)
+  return(list(submission = submissiondata,
+            sampledata = sampledata,
+            subjectdata = subjectdata,
+            nichddata = nichddata))
+}
+
+#' @export
+validate_manifests_submission <- function(data) {
+  # There should only be three files
+  # with distinct values for 'nda_short_name'
+  # in the set of allowed short name values
+  expected_nda_short_names <- c("genomics_sample03",
+                                "genomics_subject02",
+                                "nichd_btb02")
+  data %>%
+    assertr::chain_start() %>%
+    assertr::verify(nrow(data) == 3) %>%
     assertr::verify(assertr::is_uniq(nda_short_name)) %>%
-    assertr::verify(nda_short_name %in% c('genomics_sample03', 'genomics_subject02', 'nichd_btb02'))
+    assertr::verify(assertr::not_na(grant)) %>%
+    assertr::verify(dplyr::n_distinct(grant) == 1) %>%
+    assertr::verify(nda_short_name %in% expected_nda_short_names) %>%
+    assertr::chain_end() %>%
+    tibble::as_tibble()
+}
 
-  subjectDataRow <- d %>% dplyr::filter(nda_short_name == "genomics_subject02")
-  sampleDataRow <- d %>% dplyr::filter(nda_short_name == "genomics_sample03")
-  nichdDataRow <- d %>% dplyr::filter(nda_short_name == "nichd_btb02")
-
-  subjectData <- readr::read_csv(synapser::synGet(subjectDataRow$id,
-                                                  version=subjectDataRow$currentVersion)$path,
-                                 skip=1) %>%
+#' @export
+validate_subject_data <- function(data) {
+  data %>%
     assertr::chain_start() %>%
     assertr::verify(assertr::is_uniq(subjectkey)) %>%
     assertr::verify(assertr::is_uniq(src_subject_id)) %>%
     assertr::verify(assertr::is_uniq(sample_id_original)) %>%
     assertr::verify(assertr::is_uniq(sample_id_biorepository)) %>%
-    assertr::chain_end()
+    assertr::chain_end() %>%
+    tibble::as_tibble()
+}
 
-  nichdData <- readr::read_csv(synapser::synGet(nichdDataRow$id,
-                                                version=nichdDataRow$currentVersion)$path,
-                               skip=1) %>%
+#' @export
+validate_nichd_data <- function(data, subjectdata) {
+  data %>%
     assertr::chain_start() %>%
-    assertr::verify(subjectkey %in% subjectData$subjectkey) %>%
-    assertr::verify(src_subject_id %in% subjectData$src_subject_id) %>%
     assertr::verify(assertr::is_uniq(sample_id_original)) %>%
-    assertr::chain_end()
+    assertr::verify(subjectkey %in% subjectdata$subjectkey) %>%
+    assertr::verify(src_subject_id %in% subjectdata$src_subject_id) %>%
+    assertr::chain_end() %>%
+    tibble::as_tibble()
+}
 
-  sampleData <- readr::read_csv(synapser::synGet(sampleDataRow$id,
-                                                 version=sampleDataRow$currentVersion)$path,
-                                skip=1)
-
-  sampleData <- sampleData %>%
+#' @export
+validate_sample_data <- function(data, submissiondata, subjectdata, nichddata) {
+  data %>%
     assertr::chain_start() %>%
-    assertr::verify(subjectkey %in% subjectData$subjectkey) %>%
-    assertr::verify(src_subject_id %in% subjectData$src_subject_id) %>%
-    assertr::verify(sample_id_biorepository %in% nichdData$sample_id_original) %>%
-    assertr::verify(assertr::is_uniq(sample_id_original)) %>%
-    assertr::chain_end()
-
-  return(list(sampleData=sampleData, subjectData=subjectData, nichdData=nichdData))
+    assertr::verify(assertr::not_na(site)) %>%
+    assertr::verify(dplyr::n_distinct(site) == 1) %>%
+    assertr::assert(assertr::in_set(submissiondata$grant), site) %>%
+    assertr::verify(subjectkey %in% subjectdata$subjectkey) %>%
+    assertr::verify(src_subject_id %in% subjectdata$src_subject_id) %>%
+    assertr::verify(sample_id_biorepository %in% nichddata$sample_id_original) %>%
+    assertr::chain_end() %>%
+    tibble::as_tibble()
 }

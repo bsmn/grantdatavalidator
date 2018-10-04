@@ -2,4 +2,8 @@
 
 export("%>%")
 export(validate)
+export(validate_manifests_submission)
+export(validate_nichd_data)
+export(validate_sample_data)
+export(validate_subject_data)
 importFrom(magrittr,"%>%")
