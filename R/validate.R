@@ -19,11 +19,11 @@ validate <- function(manifestsviewid, parentid) {
                                  subjectdata = subjectdata)
 
   sampledata <- read_and_validate(id = sampledatarow$id,
-                                 version = sampledatarow$currentVersion,
-                                 validation_func = validate_sample_data,
-                                 submissiondata = submissiondata,
-                                 subjectdata = subjectdata,
-                                 nichddata = nichddata)
+                                  version = sampledatarow$currentVersion,
+                                  validation_func = validate_sample_data,
+                                  submissiondata = submissiondata,
+                                  subjectdata = subjectdata,
+                                  nichddata = nichddata)
 
   # submissiondata <- submissiondata %>% tibble::as_tibble()
   # submissiondata$data <- list(sampledata, subjectdata, nichddata)
