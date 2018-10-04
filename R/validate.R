@@ -25,9 +25,6 @@ validate <- function(manifestsviewid, parentid) {
                                   subjectdata = subjectdata,
                                   nichddata = nichddata)
 
-  # submissiondata <- submissiondata %>% tibble::as_tibble()
-  # submissiondata$data <- list(sampledata, subjectdata, nichddata)
-  # return(submissiondata)
   return(list(submission = submissiondata,
               sampledata = sampledata,
               subjectdata = subjectdata,
