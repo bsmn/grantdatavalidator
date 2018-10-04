@@ -1,10 +1,6 @@
 #' @export
 validate <- function(manifestsviewid, parentid) {
-  query <- glue::glue("select * from {manifestsviewid} where parentId=\'{parentid}\'")
-  dres <- synapser::synTableQuery(query)
-  submissiondata <- dres$asDataFrame() %>%
-    validate_manifests_submission() %>%
-    dplyr::arrange(nda_short_name)
+  submissiondata <- get_submission(manifestsviewid, parentid)
 
   subjectdatarow <- submissiondata %>%
     dplyr::filter(nda_short_name == "genomics_subject02")
@@ -38,6 +34,17 @@ validate <- function(manifestsviewid, parentid) {
               nichddata = nichddata))
 }
 
+#' @export
+get_submission <- function(manifestsviewid, parentid) {
+  query <- glue::glue("select * from {manifestsviewid} where parentId=\'{parentid}\'")
+  dres <- synapser::synTableQuery(query)
+  submissiondata <- dres$asDataFrame() %>%
+    validate_manifests_submission() %>%
+    dplyr::arrange(nda_short_name)
+  return(submissiondata)
+}
+
+#' @export
 read_and_validate <- function(id, version, validation_func, ...) {
   dataobj <- synapser::synGet(id, version = version)
   readr::read_csv(dataobj$path, skip = 1) %>%
