@@ -13,34 +13,35 @@ validate <- function(manifestsviewid, parentid) {
   nichddatarow <- submissiondata %>%
     dplyr::filter(nda_short_name == "nichd_btb02")
 
-  subjectdataobj <- synapser::synGet(subjectdatarow$id,
-                                     version = subjectdatarow$currentVersion)
-  subjectdata <- readr::read_csv(subjectdataobj$path,
-                                 skip = 1) %>%
-    validate_subject_data(.)
+  subjectdata <- read_and_validate(id = subjectdatarow$id,
+                                   version = subjectdatarow$currentVersion,
+                                   validation_func = validate_subject_data)
 
-  nichddataobj <- synapser::synGet(nichddatarow$id,
-                                   version = nichddatarow$currentVersion)
-  nichddata <- readr::read_csv(nichddataobj$path,
-                               skip = 1) %>%
-    validate_nichd_data(., subjectdata = subjectdata)
+  nichddata <- read_and_validate(id = nichddatarow$id,
+                                 version = nichddatarow$currentVersion,
+                                 validation_func = validate_nichd_data,
+                                 subjectdata = subjectdata)
 
-  sampledataobj <- synapser::synGet(sampledatarow$id,
-                                    version = sampledatarow$currentVersion)
-  sampledata <- readr::read_csv(sampledataobj$path,
-                                skip = 1) %>%
-    validate_sample_data(.,
-                         submissiondata = submissiondata,
-                         subjectdata = subjectdata,
-                         nichddata = nichddata)
+  sampledata <- read_and_validate(id = sampledatarow$id,
+                                 version = sampledatarow$currentVersion,
+                                 validation_func = validate_sample_data,
+                                 submissiondata = submissiondata,
+                                 subjectdata = subjectdata,
+                                 nichddata = nichddata)
 
   # submissiondata <- submissiondata %>% tibble::as_tibble()
   # submissiondata$data <- list(sampledata, subjectdata, nichddata)
   # return(submissiondata)
   return(list(submission = submissiondata,
-            sampledata = sampledata,
-            subjectdata = subjectdata,
-            nichddata = nichddata))
+              sampledata = sampledata,
+              subjectdata = subjectdata,
+              nichddata = nichddata))
+}
+
+read_and_validate <- function(id, version, validation_func, ...) {
+  dataobj <- synapser::synGet(id, version = version)
+  readr::read_csv(dataobj$path, skip = 1) %>%
+    validation_func(., ...)
 }
 
 #' @export
