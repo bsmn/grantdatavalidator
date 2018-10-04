@@ -12,7 +12,9 @@ devtools::install_github("bsmn/grantdatavalidator")
 
 ## Example
 
-This is a basic example which shows you how to validate manifests uploaded to Synapse:
+This is a basic example which shows you how to validate manifests uploaded to Synapse.
+
+It assumes that you have uploaded the three required manifest files and annotated them with the appropriate `nda_short_name` (one of `genomics_subject02`, `genomics_sample03`, or `nichd_btb02`) and `grant`.
 
 ``` r
 library(grantdatavalidator)
@@ -22,7 +24,7 @@ synLogin()
 # A table that aggregates all submitted manifests - don't change this
 manifestsviewid <- 'syn12031228'
 
-# the folder ID of where your manifests are
+# the Synapse folder ID of where the three manifests are
 parentid <- 'syn12345678'
 
 res <- validate(manifestsviewid, parentid)
