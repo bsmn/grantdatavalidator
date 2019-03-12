@@ -95,6 +95,7 @@ validate_manifests_submission <- function(data) {
     assertr::chain_start() %>%
     assertr::verify(nrow(data) == 3) %>%
     assertr::verify(assertr::is_uniq(nda_short_name)) %>%
+    assertr::verify(assertr::not_na(nda_short_name)) %>%
     assertr::verify(assertr::not_na(grant)) %>%
     assertr::verify(dplyr::n_distinct(grant) == 1) %>%
     assertr::verify(nda_short_name %in% expected_nda_short_names) %>%
