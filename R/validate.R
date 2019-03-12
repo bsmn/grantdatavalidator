@@ -32,6 +32,32 @@ validate <- function(manifestsviewid, parentid) {
 }
 
 #' @export
+get_manifests <- function(manifestsviewid, parentid) {
+  submissiondata <- get_submission(manifestsviewid, parentid)
+
+  subjectdatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "genomics_subject02")
+  sampledatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "genomics_sample03")
+  nichddatarow <- submissiondata %>%
+    dplyr::filter(nda_short_name == "nichd_btb02")
+
+  subjectdata <- syn_get_manifest(id = subjectdatarow$id,
+                                  version = subjectdatarow$currentVersion)
+
+  nichddata <- syn_get_manifest(id = nichddatarow$id,
+                                version = nichddatarow$currentVersion)
+
+  sampledata <- syn_get_manifest(id = sampledatarow$id,
+                                 version = sampledatarow$currentVersion)
+
+  return(list(submission = submissiondata,
+              sampledata = sampledata,
+              subjectdata = subjectdata,
+              nichddata = nichddata))
+}
+
+#' @export
 get_submission <- function(manifestsviewid, parentid) {
   query <- glue::glue("select * from {manifestsviewid} where parentId=\'{parentid}\'")
   dres <- synapser::synTableQuery(query)
@@ -45,6 +71,7 @@ read_manifest <- function(filepath) {
   readr::read_csv(filepath, skip = 1, col_types = readr::cols(.default = "c"))
 }
 
+#' @export
 syn_get_manifest <- function(id, version) {
   dataobj <- synapser::synGet(id, version = version)
   read_manifest(filepath = dataobj$path)
