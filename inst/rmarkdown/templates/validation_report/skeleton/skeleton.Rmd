@@ -1,0 +1,43 @@
+---
+title: "BSMN Grant Data Validation Report"
+author: "Kenneth Daily"
+date: "`r date()`"
+output: html_document
+params:
+  parentid: NA
+  manifestsviewid: 'syn12031228'
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(DT)
+library(synapser)
+library(grantdatavalidator)
+
+synLogin()
+```
+
+```{r}
+# A table that aggregates all submitted manifests - don't change this
+
+res <- grantdatavalidator::validate(params$manifestsviewid, params$parentid)
+```
+
+## Subject Data
+```{r}
+res$subjectdata %>% DT::datatable(.)
+```
+
+## Tissue Data
+
+```{r}
+res$nichddata %>% DT::datatable(.)
+```
+
+## Sample Data
+
+```{r}
+res$sampledata %>% DT::datatable(.)
+```
