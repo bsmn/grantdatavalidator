@@ -13,3 +13,4 @@ RUN Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE, threads =
 RUN R CMD INSTALL .
 
 COPY exec/validate.R /usr/local/bin/
+COPY inst/rmarkdown/templates/validation_report/skeleton/skeleton.Rmd /validation_template.Rmd
