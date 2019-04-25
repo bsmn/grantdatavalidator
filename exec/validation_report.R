@@ -18,13 +18,15 @@ read_args <- function() {
                 help = "Synapse ID of file view with all manifests.",
                 dest = "manifests_file_view_id",
                 default = "syn12031228"),
-    make_option(c("output_file"), type = "character",
+    make_option(c("--output_file"), type = "character",
                 help = "Synapse ID of file view with all manifests.",
                 dest = "output_file"))
                 
   opt <- parse_args(OptionParser(option_list = option_list))
   return(opt)
 }
+
+opt <- read_args()
 
 # A table that aggregates all submitted manifests - don't change this
 manifestsviewid <- opt$manifests_file_view_id
