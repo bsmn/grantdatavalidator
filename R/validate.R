@@ -6,7 +6,7 @@ validate <- function(manifestsviewid, parentid) {
     return(list(submission=submissiondata,
                 sampledata=data.frame(),
                 subjectdata=data.frame(),
-                nichddata=data.frame())
+                nichddata=data.frame()))
   }
 
   subjectdatarow <- submissiondata %>%
