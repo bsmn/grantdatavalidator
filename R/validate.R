@@ -3,10 +3,10 @@ validate <- function(manifestsviewid, parentid) {
   submissiondata <- get_submission(manifestsviewid, parentid)
 
   if (!("nda_short_name" %in% submissiondata)) {
-    return(list(submission=submissiondata,
-                sampledata=data.frame(),
-                subjectdata=data.frame(),
-                nichddata=data.frame()))
+    return(list(submission = submissiondata,
+                sampledata = data.frame(),
+                subjectdata = data.frame(),
+                nichddata = data.frame()))
   }
 
   subjectdatarow <- submissiondata %>%
