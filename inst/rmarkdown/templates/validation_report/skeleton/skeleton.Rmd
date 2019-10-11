@@ -25,6 +25,11 @@ synLogin()
 res <- grantdatavalidator::validate(params$manifestsviewid, params$parentid)
 ```
 
+## Submission Data
+```{r}
+res$submission %>% DT::datatable(.)
+```
+
 ## Subject Data
 ```{r}
 res$subjectdata %>% DT::datatable(.)
