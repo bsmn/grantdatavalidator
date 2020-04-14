@@ -29,3 +29,7 @@ parentid <- 'syn12345678'
 
 res <- validate(manifestsviewid, parentid)
 ```
+
+## RStudio
+
+If you install this package and use RStudio, there is an [RMarkdown template](https://rstudio.github.io/rstudio-extensions/rmarkdown_templates.html) available titled 'BSMN Grant Data Validation Report'. 
