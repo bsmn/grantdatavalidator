@@ -1,6 +1,6 @@
 # grantdatavalidator
 
-The goal of grantdatavalidator is to validate grant data that has passed NDA validation for use in the BSMN.
+The goal of this pacakge is to validate grant data that has passed NDA validation for use in the BSMN. The submission description and instructions for creating a valid submission are available in Synapse [here](https://www.synapse.org/#!Synapse:syn5902559/wiki/408697) (requires membership in the BSMN consortium to view).
 
 ## Installation
 
