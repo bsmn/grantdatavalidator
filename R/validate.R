@@ -2,7 +2,7 @@
 validate <- function(manifestsviewid, parentid) {
   submissiondata <- get_submission(manifestsviewid, parentid)
 
-  if (!("nda_short_name" %in% submissiondata)) {
+  if (!("nda_short_name" %in% colnames(submissiondata))) {
     return(list(submission = submissiondata,
                 sampledata = data.frame(),
                 subjectdata = data.frame(),
