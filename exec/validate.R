@@ -20,6 +20,8 @@ read_args <- function() {
   return(opt)
 }
 
+opt <- read_args()
+
 # A table that aggregates all submitted manifests - don't change this
 manifestsviewid <- opt$manifests_file_view_id
 
